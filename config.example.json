@@ -1,0 +1,30 @@
+{
+  "host": "127.0.0.1",
+  "port": 8787,
+  "base_path": "",
+  "admins": ["admin@example.com"],
+  "komga": {
+    "url": "https://example.com/komga",
+    "username": "admin@example.com",
+    "password": "KOMGA_PASSWORD",
+    "libraries": { "manga": ["Manga"], "novel": ["Novels"] }
+  },
+  "local_users": {},
+  "prowlarr": {
+    "url": "https://example.com/prowlarr",
+    "api_key": "PROWLARR_API_KEY",
+    "indexer_ids": []
+  },
+  "qbittorrent": {
+    "url": "https://example.com/qbittorrent",
+    "username": "QBITTORRENT_USER",
+    "password": "QBITTORRENT_PASSWORD"
+  },
+  "kinds": {
+    "manga": { "newznab": [7030, 7000], "qbit_category": "manga" },
+    "novel": { "newznab": [7020, 7000], "qbit_category": "novels" }
+  },
+  "auto_grab": true,
+  "max_queries": 2,
+  "secure_cookies": false
+}

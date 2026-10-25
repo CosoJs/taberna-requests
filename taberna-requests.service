@@ -1,0 +1,12 @@
+[Unit]
+Description=Taberna Requests (pedidos de manga y novelas)
+After=network-online.target
+
+[Service]
+WorkingDirectory=%h/taberna-requests
+ExecStart=/usr/bin/python3 %h/taberna-requests/app.py %h/taberna-requests/config.json
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

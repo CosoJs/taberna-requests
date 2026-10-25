@@ -1,0 +1,75 @@
+:root {
+  --bg: #111318; --panel: #1b1e26; --line: #2c303b; --text: #e8e9ee; --muted: #9aa0ad;
+  --accent: #e0434a; --ok: #3fb27f; --warn: #d9a23b; --bad: #c0474d;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.45 system-ui, sans-serif; }
+a { color: #8fb4ff; }
+button, input, select { font: inherit; color: inherit; }
+button { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; cursor: pointer; }
+button:hover { border-color: var(--muted); }
+button:disabled { opacity: .6; cursor: wait; }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button.danger { color: #ff8a8f; }
+button.link { background: none; border: 0; color: #8fb4ff; padding: 0 0 0 10px; }
+input, select { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 6px 0; }
+.grow { flex: 1; min-width: 0; }
+
+header { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.brand { margin-right: auto; }
+nav { display: flex; gap: 4px; }
+.tab { background: none; border-color: transparent; }
+.tab.on { border-color: var(--accent); }
+.who { color: var(--muted); font-size: 13px; }
+main { padding: 16px; max-width: 1100px; margin: 0 auto; }
+
+.login { max-width: 340px; margin: 12vh auto; display: grid; gap: 10px; padding: 16px; }
+.login h1 { margin: 0; }
+
+.search { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.search input { flex: 1; min-width: 180px; }
+.chip.on { border-color: var(--accent); }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; }
+.card { display: flex; flex-direction: column; gap: 4px; text-align: left; padding: 8px; }
+.card img, .nocover { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 6px; background: var(--line); }
+.card .title { font-weight: 600; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+
+.badge { display: inline-block; font-size: 12px; padding: 1px 8px; border-radius: 99px; background: var(--line); width: fit-content; }
+.badge.pending { background: var(--warn); color: #111; }
+.badge.approved { background: #3a6fd8; }
+.badge.grabbed { background: var(--ok); color: #111; }
+.badge.denied { background: var(--bad); }
+
+.overlay { position: fixed; inset: 0; background: #000a; display: grid; place-items: center; padding: 16px; z-index: 10; }
+.modal { position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px; max-width: 760px; width: 100%; max-height: 90vh; overflow: auto; }
+.modal .x { position: absolute; top: 8px; right: 8px; border: 0; font-size: 22px; line-height: 1; }
+.detail { display: flex; gap: 16px; }
+.detail img { width: 160px; border-radius: 8px; align-self: flex-start; }
+.detail h2 { margin: 0 24px 4px 0; }
+.desc { white-space: pre-line; max-height: 40vh; overflow: auto; }
+
+.list { display: grid; gap: 10px; }
+.req { display: flex; gap: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px; }
+.req > img, .req > .nocover { width: 70px; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 6px; flex: none; }
+.req p { margin: 2px 0; }
+.note { color: var(--warn); }
+
+table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
+th, td { text-align: left; padding: 6px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+td.num { white-space: nowrap; }
+td .badge { margin-left: 6px; }
+tr.dim td { opacity: .55; }
+.results { overflow-x: auto; }
+
+#toast { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: var(--panel); border: 1px solid var(--ok); padding: 10px 16px; border-radius: 8px; opacity: 0; pointer-events: none; transition: opacity .2s; max-width: calc(100% - 32px); }
+#toast.show { opacity: 1; }
+#toast.bad { border-color: var(--bad); }
+
+@media (max-width: 600px) {
+  .detail { flex-direction: column; }
+  .detail img { width: 120px; }
+}
