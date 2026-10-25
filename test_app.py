@@ -53,6 +53,8 @@ class Fake(http.server.BaseHTTPRequestHandler):
         base = f"http://127.0.0.1:{self.server.server_port}"
         path = urllib.parse.urlsplit(self.path).path
         if path == "/komga/api/v2/users/me":
+            if "komga-remember-me=COOKIE-DE-AMIGO-123" in self.headers.get("Cookie", ""):
+                return self.reply(200, json.dumps({"email": "amigo@x", "roles": []}).encode())
             user = base64.b64decode(self.headers.get("Authorization", "Basic Og==")[6:]).decode()
             if user == "admin@x:pw":
                 return self.reply(200, json.dumps({"email": "admin@x", "roles": ["ADMIN"]}).encode())
@@ -199,6 +201,17 @@ class EndToEnd(unittest.TestCase):
         self.assertEqual(len(ADDED), n)  # v09-13 ya se bajó y los packs repiten: no baja nada
         note = {x["id"]: x for x in admin.call("requests")[1]}[r2["id"]]["note"]
         self.assertIn("packs", note)
+
+    def test_login_with_komga_session(self):
+        # Una app (Komelia Requests) entra con la cookie "recordarme" de Komga, sin contraseña,
+        # y después usa el token en el header X-Session.
+        app_client = Client(self.base)
+        self.assertEqual(app_client.call("login", {"komga_remember_me": "cookie-falsa-0000"})[0], 401)
+        status, data = app_client.call("login", {"komga_remember_me": "COOKIE-DE-AMIGO-123"})
+        self.assertEqual(status, 200)
+        req = urllib.request.Request(self.base + "/api/me", headers={"X-Session": data["token"]})
+        with urllib.request.urlopen(req) as r:
+            self.assertEqual(json.loads(r.read())["email"], "amigo@x")
 
     def test_rank(self):
         res = app.rank([{"title": "Kono Sensei", "seeders": 5}, {"title": "Eromanga Sensei v1 [EPUB]", "seeders": 1}],

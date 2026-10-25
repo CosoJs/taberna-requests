@@ -171,6 +171,23 @@ def komga_login(cfg, username, password):
     return (me.get("email") or username).lower(), "ADMIN" in me.get("roles", [])
 
 
+def komga_login_cookie(cfg, remember_me):
+    """Igual que komga_login pero con la cookie "recordarme" de Komga (la que guarda Komelia):
+    así una app puede entrar sin tener la contraseña. Solo se le reenvía al Komga configurado."""
+    if not re.fullmatch(r"[A-Za-z0-9+/=_%.-]{10,1000}", remember_me or ""):
+        return None
+    url = cfg["komga"]["url"].rstrip("/") + "/api/v2/users/me"
+    status, _, data = fetch("GET", url, headers={
+        "Cookie": f"komga-remember-me={remember_me}", "Accept": "application/json",
+        "X-Requested-With": "XMLHttpRequest"})
+    if status in (401, 403):
+        return None
+    if status >= 400:
+        raise UpstreamError(f"Komga respondió {status}")
+    me = json.loads(data)
+    return (me.get("email") or "").lower() or None, "ADMIN" in me.get("roles", [])
+
+
 _KOMGA_CACHE = {"at": 0, "series": []}
 KOMGA_CACHE_SECONDS = 300
 
@@ -572,12 +589,13 @@ class App(http.server.BaseHTTPRequestHandler):
     def current_user(self):
         raw = self.headers.get("Cookie") or ""
         m = re.search(rf"(?:^|;\s*){COOKIE}=([^;]+)", raw)
-        if not m:
+        token = m.group(1) if m else self.headers.get("X-Session")  # navegador: cookie; apps: header
+        if not token:
             return None
         with db(self.cfg) as con:
             row = con.execute(
                 "SELECT u.* FROM sessions s JOIN users u ON u.email=s.email WHERE s.token=? AND s.expires>?",
-                (m.group(1), time.time())).fetchone()
+                (token, time.time())).fetchone()
         return dict(row) if row else None
 
     # --- entrada
@@ -693,12 +711,14 @@ class App(http.server.BaseHTTPRequestHandler):
         username, password = str(b.get("username", "")).strip(), str(b.get("password", ""))
         result = None
         local = cfg["local_users"].get(username)
-        if local is not None:
+        if b.get("komga_remember_me") and cfg.get("komga", {}).get("url"):
+            result = komga_login_cookie(cfg, str(b["komga_remember_me"]))  # apps como Komelia Requests
+        elif local is not None:
             if secrets.compare_digest(str(local.get("password", "")), password):
                 result = (username.lower(), bool(local.get("admin")))
         elif cfg.get("komga", {}).get("url"):
             result = komga_login(cfg, username, password)
-        if not result:
+        if not result or not result[0]:
             time.sleep(1)  # frena un poco los intentos a ciegas
             return self.send_json(401, {"error": "Usuario o contraseña incorrectos"})
         email, admin = result
@@ -710,7 +730,8 @@ class App(http.server.BaseHTTPRequestHandler):
                 con.execute("UPDATE users SET is_admin=1 WHERE email=?", (email,))
             con.execute("DELETE FROM sessions WHERE expires<?", (time.time(),))
             con.execute("INSERT INTO sessions VALUES(?, ?, ?)", (token, email, time.time() + SESSION_SECONDS))
-        return self.send_json(200, {"ok": True}, cookie=self.cookie(token, SESSION_SECONDS))
+        # el token también va en el cuerpo: las apps lo mandan después en el header X-Session
+        return self.send_json(200, {"ok": True, "token": token}, cookie=self.cookie(token, SESSION_SECONDS))
 
     def create_request(self, user, b):
         cfg = self.cfg
