@@ -15,6 +15,21 @@ A small self-hosted request manager for **manga and light novels** — think See
 Release ranking prefers: title match → not unwanted (web novels, audiobooks, wrong kind) → seeders → missing
 volumes → preferred language → complete packs → preferred format (EPUB/CBZ).
 
+## Mobile app: Komelia Requests
+
+**[Komelia Requests](https://github.com/CosoJs/Komelia-Requests)** is a fork of the Komelia reader for Android and
+desktop with a built-in Requests tab that talks to this server. Your friends read in Komga *and* request new
+titles from the same app.
+
+<img src="docs/requests-tab.jpg" alt="Requests tab in Komelia Requests" width="270">
+
+It signs in with the Komga *remember-me* session the app already has: the server forwards that cookie only to your
+configured Komga to find out who the user is (`POST /api/login` with `{"komga_remember_me": "..."}`) and returns a
+session token that the app sends as the `X-Session` header. No password is stored by the app.
+
+The app expects this server on the same host as Komga, at `/pedidos/` (`https://example.com/komga` →
+`https://example.com/pedidos`), so use `"base_path": "/pedidos"` if you want the app to find it without changes.
+
 ## Requirements
 
 - Python 3.8+ (standard library only, no `pip install` needed)
